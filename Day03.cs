@@ -8,13 +8,8 @@ using AoCHelper;
 
 namespace AOC_2024
 {
-    internal class Day03 : BaseDay
+    internal class Day03 : BaseDayWithInput
     {
-        private readonly string[] _input;
-        public Day03()
-        {
-            _input = File.ReadAllLines(InputFilePath);
-        }
         public override ValueTask<string> Solve_1()
         {
             long ans = 0;

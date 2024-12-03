@@ -7,9 +7,9 @@ using AoCHelper;
 
 namespace AOC_2024
 {
-    internal class Day04 : BaseDayWithInput
+    internal class Day11 : BaseDayWithInput
     {
-        public Day04()
+        public Day11()
         {
             
         }

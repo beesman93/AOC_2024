@@ -7,13 +7,8 @@ using System.Threading.Tasks;
 
 namespace AOC_2024
 {
-    internal class Day02 : BaseDay
+    internal class Day02 : BaseDayWithInput
     {
-        private readonly string[] _input;
-        public Day02()
-        {
-            _input = File.ReadAllLines(InputFilePath);
-        }
         public override ValueTask<string> Solve_1()
         {
             var result = 0;
@@ -69,7 +64,6 @@ namespace AOC_2024
             bool? desc = null;
             bool? was_desc = null;
             bool safe = true;
-            int breaks = 0;
             for (int i = 1; i < levels.Count(); i++)
             {
                 was_desc = desc;
