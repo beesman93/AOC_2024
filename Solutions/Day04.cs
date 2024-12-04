@@ -9,7 +9,7 @@ namespace AOC_2024
 {
     internal class Day04 : BaseDayWithInput
     {
-        List<Tuple<int,int>> directions;
+        List<Tuple<int, int>> directions;
         public Day04()
         {
             //traverse 8 directions
@@ -46,7 +46,7 @@ namespace AOC_2024
         {
             long ans = 0;
             string find = "XMAS";
-            for (int i=0;i< _input.Length; i++)
+            for (int i = 0; i < _input.Length; i++)
             {
                 for (int j = 0; j < _input[i].Length; j++)
                 {
@@ -65,7 +65,7 @@ namespace AOC_2024
                             }
                             else
                             {
-                                ii+=dir.Item1;
+                                ii += dir.Item1;
                                 jj += dir.Item2;
                             }
                         }
@@ -91,16 +91,16 @@ namespace AOC_2024
                     if (IsLetter(i, j, 'A'))
                     {
                         bool oneDiag = false;//++ --
-                        if (IsLetter(i+1, j+1, 'M'))
+                        if (IsLetter(i + 1, j + 1, 'M'))
                         {
-                            if(IsLetter(i - 1, j - 1, 'S'))
+                            if (IsLetter(i - 1, j - 1, 'S'))
                             {
                                 oneDiag = true;
                             }
                         }
                         else if (IsLetter(i + 1, j + 1, 'S'))
                         {
-                            if(IsLetter(i - 1, j - 1, 'M'))
+                            if (IsLetter(i - 1, j - 1, 'M'))
                             {
                                 oneDiag = true;
                             }
