@@ -10,7 +10,6 @@ namespace AOC_2024
     internal class Day04 : BaseDayWithInput
     {
         List<Tuple<int,int>> directions;
-        List<List<char>> field;
         public Day04()
         {
             //traverse 8 directions
@@ -34,33 +33,22 @@ namespace AOC_2024
                new  (1, -1 ),
                new  (-1, 1 ),
                new  (-1, -1 )
-             };
-            //ii=row
-            //jj = col
-            field = new();
-            for(int i=0;i< _input.Length; i++)
-            {
-                field.Add(new List<char>());
-                foreach (var c in _input[i])
-                {
-                    field[i].Add(c);
-                }
-            }
+            };
         }
 
-        private bool IsLetter(List<List<char>> map, int i, int j, char c)
+        private bool IsLetter(int i, int j, char c)
         {
-            if (i < 0 || i >= field.Count || j < 0 || j >= field[i].Count)
+            if (i < 0 || i >= _input.Length || j < 0 || j >= _input[i].Length)
                 return false;
-            return field[i][j] == c;
+            return _input[i][j] == c;
         }
         public override ValueTask<string> Solve_1()
         {
             long ans = 0;
             string find = "XMAS";
-            for (int i=0;i< field.Count; i++)
+            for (int i=0;i< _input.Length; i++)
             {
-                for (int j = 0; j < field[i].Count; j++)
+                for (int j = 0; j < _input[i].Length; j++)
                 {
                     //EVERY START POINT HERE
                     foreach (var dir in directions)
@@ -70,7 +58,7 @@ namespace AOC_2024
                         bool found = true;
                         foreach (var c in find)
                         {
-                            if (!IsLetter(field, ii, jj, c))
+                            if (!IsLetter(ii, jj, c))
                             {
                                 found = false;
                                 break;
@@ -95,39 +83,39 @@ namespace AOC_2024
         {
             long ans = 0;
             //find "A" -- then M one dir S other, both diagonals
-            for (int i = 0; i < field.Count; i++)
+            for (int i = 0; i < _input.Length; i++)
             {
-                for (int j = 0; j < field[i].Count; j++)
+                for (int j = 0; j < _input[i].Length; j++)
                 {
                     //EVERY START POINT HERE
-                    if (IsLetter(field, i, j, 'A'))
+                    if (IsLetter(i, j, 'A'))
                     {
                         bool oneDiag = false;//++ --
-                        if (IsLetter(field, i+1, j+1, 'M'))
+                        if (IsLetter(i+1, j+1, 'M'))
                         {
-                            if(IsLetter(field, i - 1, j - 1, 'S'))
+                            if(IsLetter(i - 1, j - 1, 'S'))
                             {
                                 oneDiag = true;
                             }
                         }
-                        else if (IsLetter(field, i + 1, j + 1, 'S'))
+                        else if (IsLetter(i + 1, j + 1, 'S'))
                         {
-                            if(IsLetter(field, i - 1, j - 1, 'M'))
+                            if(IsLetter(i - 1, j - 1, 'M'))
                             {
                                 oneDiag = true;
                             }
                         }
                         bool otherDiag = false;// +- -+
-                        if (IsLetter(field, i + 1, j - 1, 'M'))
+                        if (IsLetter(i + 1, j - 1, 'M'))
                         {
-                            if (IsLetter(field, i - 1, j + 1, 'S'))
+                            if (IsLetter(i - 1, j + 1, 'S'))
                             {
                                 otherDiag = true;
                             }
                         }
-                        else if (IsLetter(field, i + 1, j - 1, 'S'))
+                        else if (IsLetter(i + 1, j - 1, 'S'))
                         {
-                            if (IsLetter(field, i - 1, j + 1, 'M'))
+                            if (IsLetter(i - 1, j + 1, 'M'))
                             {
                                 otherDiag = true;
                             }
