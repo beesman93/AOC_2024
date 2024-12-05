@@ -10,12 +10,12 @@ namespace AOC_2024
 {
     internal class Day05 : BaseDayWithInput
     {
-        class numero : IComparable<numero>
+        class page : IComparable<page>
         {
             public int id;
             HashSet<int> largerNumeros = new HashSet<int>();
             HashSet<int> smallerNumeros = new HashSet<int>();
-            public numero(int id)
+            public page(int id)
             {
                 this.id = id;
             }
@@ -28,7 +28,7 @@ namespace AOC_2024
                 smallerNumeros.Add(n);
             }
 
-            public int CompareTo(numero? other)
+            public int CompareTo(page? other)
             {
                 if(largerNumeros.Contains(other.id))
                     return -1;
@@ -38,8 +38,8 @@ namespace AOC_2024
             }
         }
 
-        Dictionary<int, numero> numeros = new Dictionary<int, numero>();
-        List<List<numero>> lists = new List<List<numero>>();
+        Dictionary<int, page> numeros = [];
+        List<List<page>> lists = [];
         public Day05()
         {
             //read rules first
@@ -53,9 +53,9 @@ namespace AOC_2024
                 int right = Convert.ToInt32(parts[1]);
 
                 if (!numeros.ContainsKey(left))
-                    numeros[left] = new numero(left);
+                    numeros[left] = new page(left);
                 if (!numeros.ContainsKey(right))
-                    numeros[right] = new numero(right);
+                    numeros[right] = new page(right);
 
                 numeros[left].AddLarger(right);
                 numeros[right].AddSmaller(left);
@@ -66,7 +66,7 @@ namespace AOC_2024
             while (index < _input.Length)
             {
                 var parts = _input[index].Split(",");
-                lists.Add(new List<numero>());
+                lists.Add(new List<page>());
                 foreach (var part in parts)
                 {
                     lists.Last().Add(numeros[Convert.ToInt32(part)]);
@@ -79,8 +79,8 @@ namespace AOC_2024
             long ans = 0;
             foreach (var list in lists)
             {
-                var lCopy = new List<numero>(list);
-                lCopy.Sort(new Comparison<numero>((a, b) => a.CompareTo(b)));
+                var lCopy = new List<page>(list);
+                lCopy.Sort(new Comparison<page>((a, b) => a.CompareTo(b)));
                 if (lCopy.SequenceEqual(list))
                     ans += list[list.Count() / 2].id;
             }
@@ -92,8 +92,8 @@ namespace AOC_2024
             long ans = 0;
             foreach (var list in lists)
             {
-                var lCopy = new List<numero>(list);
-                lCopy.Sort(new Comparison<numero>((a, b) => a.CompareTo(b)));
+                var lCopy = new List<page>(list);
+                lCopy.Sort(new Comparison<page>((a, b) => a.CompareTo(b)));
                 if (!lCopy.SequenceEqual(list))
                     ans += lCopy[lCopy.Count() / 2].id;
             }

@@ -8,4 +8,4 @@ using AoCHelper;
     options.ClearConsole = false;
 });*/
 
-Solver.Solve(new List<Type> { typeof(Day05) });
+Solver.Solve(new List<Type> { typeof(Day06) });
