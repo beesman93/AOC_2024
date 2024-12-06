@@ -4,4 +4,5 @@ inputs ommited: https://adventofcode.com/about#faq_copying
 <br>add inputs to Inputs/XX.txt
 <br>(XX being day number)
 
-![aoc2024](https://github.com/user-attachments/assets/530ea502-ee2a-4001-a638-77ce6fe42144)
+![image](https://github.com/user-attachments/assets/5c6112f0-0a86-4a7d-978e-632bb16aea59)
+
