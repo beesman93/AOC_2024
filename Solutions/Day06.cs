@@ -10,187 +10,125 @@ namespace AOC_2024
 {
     internal class Day06 : BaseDayWithInput
     {
-
+        HashSet<coord> obsticles;
+        private readonly coord startingPosition;
+        private readonly coord startingVelocity;
+        Dictionary<coord, HashSet<coord>> visitedS1;
         public Day06()
         {
-
+            obsticles = [];
+            startingVelocity = new coord(0, -1);
+            for (int row = 0; row < _input.Length; row++)
+            {
+                for (int col = 0; col < _input[0].Length; col++)
+                {
+                    if (_input[row][col] == '#')
+                        obsticles.Add(new coord(col, row));
+                    if (_input[row][col] == '^')
+                        startingPosition = new coord(col, row);
+                }
+            }
         }
         public override ValueTask<string> Solve_1()
         {
-            long ans = 0;
-
-
-            Tuple<int, int> velocity = new(0, -1);
-            Tuple<int, int> position = new(0, 0);
-
-            //x is columns, y is rows
-            int xMax = _input[0].Length;
-            int yMax = _input.Length;
-
-            //max 130 per direction
-            HashSet<long> obsticles = []; // pos.x * 1'000 + pos.y
-            HashSet<long> visitedWithoutDir = []; // pos.x * 1'000 + pos.y
-            HashSet<long> visited = []; // velocityIdx *1'000'000 pos.x * 1'000 + pos.y
-
-            for(int row =0; row < yMax; row++)
-            {
-                for (int col = 0; col < xMax; col++)
-                {
-                    if (_input[row][col] == '#')
-                    {
-                        obsticles.Add(col * 1_000 + row);
-                    }
-                    if (_input[row][col] == '^')
-                    {
-                        position = new Tuple<int, int>(col, row);
-                    }
-                }
-            }
-
-            while (true)
-            {
-                /*if (visited.Contains(velocityToInt(in velocity) + position.Item1 * 1_000 + position.Item2))
-                    break;*/
-                /*
-                 * Looking for guard to leave map, not loop OOOOOMGGGGGGG
-                 */
-
-                visitedWithoutDir.Add(position.Item1 * 1_000 + position.Item2);
-                visited.Add(velocityToInt(in velocity) + position.Item1 * 1_000 + position.Item2);
-
-                Tuple<int, int> nextPosition = new(position.Item1 + velocity.Item1, position.Item2 + velocity.Item2);
-                if (obsticles.Contains(nextPosition.Item1 * 1_000 + nextPosition.Item2))
-                    turnRight(ref velocity);
-                else
-                    position = nextPosition;
-
-                if( nextPosition.Item1 < 0 || nextPosition.Item1 >= yMax
-                || nextPosition.Item2 < 0 || nextPosition.Item2 >= xMax)
-                {
-                    break;
-                }
-            }
-
-            return new($"{visitedWithoutDir.Count}");
+            coord velocity = new coord(startingVelocity);
+            coord position = new coord(startingPosition);
+            Dictionary<coord, HashSet<coord>> visited = [];//pos -> velocities we entered the position with
+            while (move(ref position, ref velocity, ref visited) == MoveResult.Ok) ;
+            visitedS1 = visited;
+            return new($"{visited.Count}");
         }
 
         public override ValueTask<string> Solve_2()
         {
-            //x is columns, y is rows
-            int xMax = _input[0].Length;
-            int yMax = _input.Length;
-
-            Tuple<int, int> velocityOG = new(0, -1);
-            Tuple<int, int> positionOG = new(0, 0);
-
-            //max 130 per direction
-            HashSet<long> obsticlesOG = []; // pos.x * 1'000 + pos.y
-
-            List<Tuple<int, int>> posNewObsticles = [];
-
-            for (int row = 0; row < yMax; row++)
+            int ans = 0;
+            int entries = 0;
+            int exits = 0;
+            //optimization1: limit search space to obsticles that are in the way of guard path
+            //(we know those from visited set from first solution and velocities in each path)
+            HashSet<coord> possibleExtraObsticles = [];
+            foreach (var kvPair in visitedS1.Skip(1))
             {
-                for (int col = 0; col < xMax; col++)
+                foreach (var velocity in kvPair.Value)
                 {
-                    if (_input[row][col] == '#')
-                    {
-                        obsticlesOG.Add(col * 1_000 + row);
-                    }
-                    if (_input[row][col] == '^')
-                    {
-                        positionOG = new Tuple<int, int>(col, row);
-                    }
-                    else
-                    {
-                        posNewObsticles.Add(new Tuple<int, int>(col, row));
-                    }
+                    //we don't want double obsticling
+                    //so we can just Add and remove to instanced obsticles later
+                    if (!obsticles.Contains(kvPair.Key))
+                        possibleExtraObsticles.Add(kvPair.Key);
                 }
             }
+            possibleExtraObsticles.Remove(startingPosition);//in case it got added
 
-            int ans = 0;
-            foreach (var obsticle in posNewObsticles)
+            foreach (coord key in possibleExtraObsticles)
             {
-                HashSet<long> visitedWithoutDir = []; // pos.x * 1'000 + pos.y
-                HashSet<long> visited = []; // velocityIdx *1'000'000 pos.x * 1'000 + pos.y
-                var velocity = velocityOG;
-                var position = positionOG;
-                var obsticles = new HashSet<long>(obsticlesOG);
-                obsticles.Add(obsticle.Item1 * 1_000 + obsticle.Item2);
-                bool looptyLoop = false;
-                while (true)
-                {
-                    if (visited.Contains(velocityToInt(in velocity) + position.Item1 * 1_000 + position.Item2))
-                    {
-                        looptyLoop = true;
-                        ans++;
-                        break;
-                    }
-
-                    visitedWithoutDir.Add(position.Item1 * 1_000 + position.Item2);
-                    visited.Add(velocityToInt(in velocity) + position.Item1 * 1_000 + position.Item2);
-
-                    Tuple<int, int> nextPosition = new(position.Item1 + velocity.Item1, position.Item2 + velocity.Item2);
-                    if (obsticles.Contains(nextPosition.Item1 * 1_000 + nextPosition.Item2))
-                        turnRight(ref velocity);
-                    else
-                        position = nextPosition;
-
-                    if (nextPosition.Item1 < 0 || nextPosition.Item1 >= yMax
-                    || nextPosition.Item2 < 0 || nextPosition.Item2 >= xMax)
-                    {
-                        break;
-                    }
-                }
+                coord position = new(startingPosition);
+                coord velocity = new(startingVelocity);
+                Dictionary<coord, HashSet<coord>> visited = [];
+                obsticles.Add(key);
+                while (move(ref position, ref velocity, ref visited) == MoveResult.Ok) ;
+                var x = move(ref position, ref velocity, ref visited);
+                if (x == MoveResult.enteredLoop)
+                    ans++;
+                if (x == MoveResult.exitedMap)
+                    exits++;
+                obsticles.Remove(key);
+                entries++;
             }
 
             return new($"{ans}");
         }
 
-        public int velocityToInt(in Tuple<int, int> velocity)
+        record coord
         {
-            int output = 0;
-            if(velocity.Item1 == 0 && velocity.Item2 == -1)
+            public int col;
+            public int row;
+
+            public coord(coord c)//copy constructor
+                => (col, row) = (c.col, c.row);
+            public void turnRight()
             {
-                output = 1;
+                (col, row) = (row, col);
+                col *= -1;
             }
-            else if (velocity.Item1 == 1 && velocity.Item2 == 0)
-            {
-                output = 2;
-            }
-            else if (velocity.Item1 == 0 && velocity.Item2 == 1)
-            {
-                output = 3;
-            }
-            else if (velocity.Item1 == -1 && velocity.Item2 == 0)
-            {
-                output = 4;
-            }
-            return output*1_000_000;
-        }
-        public void turnRight(ref Tuple<int, int> velocity)
-        {
-            //up, right, down, left
-            /*  0,-1
-             *  1,0
-             *  0,1
-             *  -1,0
+            /*          ^^^^^^^^^^^
+             *      moving UP        col  0, row -1
+             *      moving RIGHT     col +1, row  0
+             *      moving DOWN      col  0, row +1
+             *      moving LEFT      col -1, row  0
+             *      so turning right => new column speed is -old row speed
+             *      new row speed is old column speed
              */
-            if (velocity.Item1 == 0 && velocity.Item2 == -1)
+            public coord(int col, int row)
+                => (this.col, this.row) = (col, row);
+            public static coord operator +(coord a, coord b)
+                => new(a.col + b.col, a.row + b.row);
+        }
+        enum MoveResult
+        {
+            Ok,
+            exitedMap,
+            enteredLoop
+        }
+        private MoveResult move(ref coord position, ref coord velocity, ref Dictionary<coord, HashSet<coord>> visited)
+        {
+            if (position.col < 0 || position.col >= _input[0].Length
+            || position.row < 0 || position.row >= _input.Length)
+                return MoveResult.exitedMap;
+            if (visited.ContainsKey(position))
             {
-                velocity = new Tuple<int, int>(1, 0);
+                if (visited[position].Contains(velocity))
+                    return MoveResult.enteredLoop;
+                visited[position].Add(velocity);
             }
-            else if (velocity.Item1 == 1 && velocity.Item2 == 0)
+            else
             {
-                velocity = new Tuple<int, int>(0, 1);
+                visited.Add(position, new HashSet<coord> { velocity });
             }
-            else if (velocity.Item1 == 0 && velocity.Item2 == 1)
-            {
-                velocity = new Tuple<int, int>(-1, 0);
-            }
-            else if (velocity.Item1 == -1 && velocity.Item2 == 0)
-            {
-                velocity = new Tuple<int, int>(0, -1);
-            }
+            if (this.obsticles.Contains(position + velocity))
+                velocity.turnRight();//we would hit an obsticle
+            else
+                position += velocity;
+            return MoveResult.Ok;
         }
     }
 }
