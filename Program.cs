@@ -8,9 +8,9 @@ using AoCHelper;
     options.ClearConsole = false;
 });*/
 
-Solver.Solve([typeof(Day07)], options =>
-{
-    options.ShowConstructorElapsedTime = true;
-    options.ShowOverallResults = true;
-    options.ClearConsole = false;
-});
+/* TODO:
+ * 
+ * optimize Day06 part 2
+ */
+
+Solver.Solve([typeof(Day08)]);
