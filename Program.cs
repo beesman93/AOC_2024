@@ -8,4 +8,4 @@ using AoCHelper;
     options.ClearConsole = false;
 });*/
 
-Solver.Solve([typeof(Day06)]);
+Solver.Solve([typeof(Day07)]);
