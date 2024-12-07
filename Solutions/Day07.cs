@@ -75,8 +75,7 @@ namespace AOC_2024
                 return false;
             //CONCAT
             bool concat = part2;
-            var test = LastNDigits(remainder, Digits_Log10(nums.Last()));
-            if (concat) concat = nums.Last() == test;
+            if (concat) concat = nums.Last() == LastNDigits(remainder, Digits_Log10(nums.Last()));
             if (concat)
                 concat = solveBackwards(
                     remainder / (long)Math.Pow(10, Digits_Log10(nums.Last())),
