@@ -14,7 +14,6 @@ namespace AOC_2024
         private readonly bool SOLVE_BACKWARDS = true;
         public Day07()
         {
-            Console.WriteLine($"SOLVE_BACKWARDS:{SOLVE_BACKWARDS}");
             eqations = [];
             foreach (var line in _input)
             {
@@ -51,18 +50,21 @@ namespace AOC_2024
         {
             if (running > ans)
                 return false;
-            if (running == ans && nums.Count == 0)
+            if (nums.Count == 0 && running == ans)
                 return true;
             if (nums.Count == 0)
                 return false;
-            bool multi = solve(running * nums[0], ans, nums.Skip(1).ToList(), part2);
-            bool plus = solve(running + nums[0], ans, nums.Skip(1).ToList(), part2);
             bool concat = false;
             if (part2)
                 concat = solve(
                         long.Parse(running.ToString() + nums[0].ToString()),
                         ans, nums.Skip(1).ToList(), part2);
-            return multi || plus || concat;
+            if (concat) return true;
+            bool multi = solve(running * nums[0], ans, nums.Skip(1).ToList(), part2);
+            if(multi) return true;
+            bool plus = solve(running + nums[0], ans, nums.Skip(1).ToList(), part2);
+            if (plus) return true;
+            return false;
         }
 
         bool solveBackwards(long remainder, List<long> nums, bool part2)
