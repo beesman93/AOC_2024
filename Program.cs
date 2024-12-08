@@ -11,6 +11,8 @@ using AoCHelper;
 /* TODO:
  * 
  * optimize Day06 part 2
+ *  -- cache right turns without interference from new obsticle
+ *  -- call cache unless new obsticle is in the way
  */
 
 Solver.Solve([typeof(Day08)]);
