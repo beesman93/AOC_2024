@@ -13,6 +13,10 @@ using AoCHelper;
  * optimize Day06 part 2
  *  -- cache right turns without interference from new obsticle
  *  -- call cache unless new obsticle is in the way
+ *  
+ *  optimize Day09 part 2
+ *  -- part 1 can use the part 2 rewrite after
+ *  -- make the psudo memory not super bad
  */
 
-Solver.Solve([typeof(Day08)]);
+Solver.Solve([typeof(Day09)]);
