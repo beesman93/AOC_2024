@@ -131,24 +131,37 @@ namespace AOC_2024
             return new($"{ans}");
         }
 
+        static int seekBackFrom = -1;
+        static int seekForwardFrom = 0;
         private static void defragBlockWithVal(ref List<memBlock> memBlocks,int val)
         {
-
-            for (int i = memBlocks.Count()-1; i >= 0; i--)
+            if(seekBackFrom == -1)
+                seekBackFrom = memBlocks.Count() - 1;
+            for (int i = seekBackFrom; i >= 0; i--)
             {
                 if(memBlocks[i].value == val)
                 {
+                    seekBackFrom = i;
                     //found the defrag block
-                    for(int j = 0; j < i; j++)//just go upto i to not defrag after og block
+                    bool updatedFirstEmpty = false;
+                    for(int j = seekForwardFrom; j < i; j++)//just go upto i to not defrag after og block
                     {
-                        if (memBlocks[j].value == null && memBlocks[j].Size() >= memBlocks[i].Size())
+                        if (memBlocks[j].value == null)
                         {
-                            memBlock moving = new(memBlocks[i]);
-                            memBlocks[j].end -= moving.Size();
-                            //memBlocks.RemoveAt(i);
-                            memBlocks[i].value = null;
-                            memBlocks.Insert(j, moving);
-                            return;
+                            if (!updatedFirstEmpty)
+                            {
+                                seekForwardFrom = j;
+                                updatedFirstEmpty = true;
+                            }
+                            if (memBlocks[j].Size() >= memBlocks[i].Size())
+                            {
+                                memBlock moving = new(memBlocks[i]);
+                                memBlocks[j].end -= moving.Size();
+                                //memBlocks.RemoveAt(i);
+                                memBlocks[i].value = null;
+                                memBlocks.Insert(j, moving);
+                                return;
+                            }
                         }
                     }
                     return;
