@@ -19,12 +19,8 @@ namespace AOC_2024
             long ans = 0;
             for (int i = 0; i < _input.Length; i++)
                 for (int j = 0; j < _input[i].Length; j++)
-                {
                     if (_input[i][j] == '9')//count reachable 0s, add them to score
-                    {
                         ans += hikeDown(i, j);
-                    }
-                }
             return new($"{ans}");
         }
 
