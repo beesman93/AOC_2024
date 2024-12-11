@@ -19,9 +19,4 @@ using AoCHelper;
  *  -- make the psudo memory not super bad
  */
 
-Solver.Solve([typeof(Day10)], options =>
-{
-    options.ShowConstructorElapsedTime = true;
-    options.ShowOverallResults = true;
-    options.ClearConsole = false;
-});
+Solver.Solve([typeof(Day11)]);
