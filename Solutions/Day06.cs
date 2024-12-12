@@ -10,125 +10,172 @@ namespace AOC_2024
 {
     internal class Day06 : BaseDayWithInput
     {
-        HashSet<coord> obsticles;
-        private readonly coord startingPosition;
-        private readonly coord startingVelocity;
-        Dictionary<coord, HashSet<coord>> visitedS1;
+        private (int x, int y) turnRight((int x, int y) velocity) => (velocity.y, -velocity.x);
+        HashSet<(int x, int y)> obsticles;
+        private readonly (int x, int y) startingPosition;
+        private readonly (int x, int y) startingVelocity;
+        bool trackVisited;
+        HashSet<(int x, int y)> visitedS1;
+        Dictionary
+        <
+        ((int x, int y) position, (int x, int y) velocity), //start
+        ((int x, int y) position, (int x, int y) velocity)  //end
+        >
+        jumpCache;
         public Day06()
         {
             obsticles = [];
-            startingVelocity = new coord(0, -1);
-            for (int row = 0; row < _input.Length; row++)
+            visitedS1 = [];
+            jumpCache = [];
+            startingVelocity = (0, -1);
+            for (int x = 0; x < _input.Length; x++)
             {
-                for (int col = 0; col < _input[0].Length; col++)
+                for (int y = 0; y < _input[0].Length; y++)
                 {
-                    if (_input[row][col] == '#')
-                        obsticles.Add(new coord(col, row));
-                    if (_input[row][col] == '^')
-                        startingPosition = new coord(col, row);
+                    switch (_input[x][y])
+                    {
+                        case '#':
+                            obsticles.Add((x, y));
+                            break;
+                        case '^':
+                            startingPosition = (x, y);
+                            startingVelocity = (-1, 0);
+                            break;
+                        case '>':
+                            startingPosition = (x, y);
+                            startingVelocity = (0, 1);
+                            break;
+                        case 'v':
+                            startingPosition = (x, y);
+                            startingVelocity = (1, 0);
+                            break;
+                        case '<':
+                            startingPosition = (x, y);
+                            startingVelocity = (0, -1);
+                            break;
+                    }
                 }
             }
         }
+        private bool moveTillNextObsticleOrExit(ref (int x, int y) position, ref (int x, int y) velocity, (int x, int y) extraObsticle)
+        {
+            while (!obsticles.Contains((position.x + velocity.x, position.y + velocity.y)))
+            {
+                if (extraObsticle.x == position.x + velocity.x && extraObsticle.y == position.y + velocity.y)
+                {
+                    velocity = turnRight(velocity);
+                    return true;//hit extra obsticle
+                }
+                if (trackVisited)
+                    visitedS1.Add((position.x, position.y));
+                position = (position.x + velocity.x, position.y + velocity.y);
+                if(position.x < 0 || position.x >= _input.Length || position.y < 0 || position.y >= _input[0].Length)
+                {
+                    velocity = (0, 0);//map exit
+                    break;
+                }
+            }
+            velocity = turnRight(velocity);
+            return false;//didn't hit extra obsticle
+        }
+
+        private bool isObsticleInTheJump((int x, int y) start, (int x, int y) end, (int x, int y) obsticle)
+        {
+            if (start.x == end.x)
+            {
+                if (start.y < end.y)
+                {
+                    if (obsticle.x == start.x && obsticle.y >= start.y && obsticle.y <= end.y)
+                        return true;
+                }
+                else
+                {
+                    if (obsticle.x == start.x && obsticle.y <= start.y && obsticle.y >= end.y)
+                        return true;
+                }
+            }
+            else
+            {
+                if (start.x < end.x)
+                {
+                    if (obsticle.y == start.y && obsticle.x >= start.x && obsticle.x <= end.x)
+                        return true;
+                }
+                else
+                {
+                    if (obsticle.y == start.y && obsticle.x <= start.x && obsticle.x >= end.x)
+                        return true;
+                }
+            }
+            return false;
+        }
+        private void jumpToNext(ref (int x, int y) position,
+                                ref (int x, int y) velocity,
+                                (int x, int y)? extraObsticle = null)
+        {
+            if (jumpCache.ContainsKey((position, velocity)))
+            {
+                if (extraObsticle == null
+                || !isObsticleInTheJump(
+                    position,
+                    jumpCache[(position, velocity)].position,
+                    ((int x, int y))extraObsticle))
+                {
+                    (position, velocity) = jumpCache[(position, velocity)];
+                    return;
+                }
+            }
+            var start = (position, velocity);
+            if(!moveTillNextObsticleOrExit(ref position, ref velocity, extraObsticle??(-1,-1)))
+                jumpCache[start] = (position, velocity);
+        }
         public override ValueTask<string> Solve_1()
         {
-            coord velocity = new coord(startingVelocity);
-            coord position = new coord(startingPosition);
-            Dictionary<coord, HashSet<coord>> visited = [];//pos -> velocities we entered the position with
-            while (move(ref position, ref velocity, ref visited) == MoveResult.Ok) ;
-            visitedS1 = visited;
-            return new($"{visited.Count}");
+            trackVisited = true;
+            (int x, int y) position = (startingPosition.x, startingPosition.y);
+            (int x, int y) velocity = (startingVelocity.x, startingVelocity.y);
+            while (velocity != (0, 0))
+                jumpToNext(ref position, ref velocity);
+            trackVisited = false;
+            return new($"{visitedS1.Count}");
         }
 
         public override ValueTask<string> Solve_2()
         {
             int ans = 0;
-            int entries = 0;
-            int exits = 0;
-            //optimization1: limit search space to obsticles that are in the way of guard path
-            //(we know those from visited set from first solution and velocities in each path)
-            HashSet<coord> possibleExtraObsticles = [];
-            foreach (var kvPair in visitedS1.Skip(1))
+            foreach (var obsticleTry in visitedS1.Skip(1))
             {
-                foreach (var velocity in kvPair.Value)
+                (int x, int y) position = (startingPosition.x, startingPosition.y);
+                (int x, int y) velocity = (startingVelocity.x, startingVelocity.y);
+                HashSet<((int x, int y)position,(int x, int y)velocity)> visited = [];
+                while (velocity != (0, 0))
                 {
-                    //we don't want double obsticling
-                    //so we can just Add and remove to instanced obsticles later
-                    if (!obsticles.Contains(kvPair.Key))
-                        possibleExtraObsticles.Add(kvPair.Key);
+                    if (visited.Contains((position,velocity)))
+                    { 
+                        ans++;//found a loop
+                        break;
+                    }
+                    visited.Add((position, velocity));
+                    jumpToNext(ref position, ref velocity, obsticleTry);
                 }
             }
-            possibleExtraObsticles.Remove(startingPosition);//in case it got added
-
-            foreach (coord key in possibleExtraObsticles)
-            {
-                coord position = new(startingPosition);
-                coord velocity = new(startingVelocity);
-                Dictionary<coord, HashSet<coord>> visited = [];
-                obsticles.Add(key);
-                while (move(ref position, ref velocity, ref visited) == MoveResult.Ok) ;
-                var x = move(ref position, ref velocity, ref visited);
-                if (x == MoveResult.enteredLoop)
-                    ans++;
-                if (x == MoveResult.exitedMap)
-                    exits++;
-                obsticles.Remove(key);
-                entries++;
-            }
-
             return new($"{ans}");
         }
 
-        record coord
-        {
-            public int col;
-            public int row;
 
-            public coord(coord c)//copy constructor
-                => (col, row) = (c.col, c.row);
-            public void turnRight()
-            {
-                (col, row) = (row, col);
-                col *= -1;
-            }
-            /*          ^^^^^^^^^^^
-             *      moving UP        col  0, row -1
-             *      moving RIGHT     col +1, row  0
-             *      moving DOWN      col  0, row +1
-             *      moving LEFT      col -1, row  0
-             *      so turning right => new column speed is -old row speed
-             *      new row speed is old column speed
-             */
-            public coord(int col, int row)
-                => (this.col, this.row) = (col, row);
-            public static coord operator +(coord a, coord b)
-                => new(a.col + b.col, a.row + b.row);
-        }
-        enum MoveResult
-        {
-            Ok,
-            exitedMap,
-            enteredLoop
-        }
-        private MoveResult move(ref coord position, ref coord velocity, ref Dictionary<coord, HashSet<coord>> visited)
-        {
-            if (position.col < 0 || position.col >= _input[0].Length
-            || position.row < 0 || position.row >= _input.Length)
-                return MoveResult.exitedMap;
-            if (visited.ContainsKey(position))
-            {
-                if (visited[position].Contains(velocity))
-                    return MoveResult.enteredLoop;
-                visited[position].Add(velocity);
-            }
-            else
-            {
-                visited.Add(position, new HashSet<coord> { velocity });
-            }
-            if (this.obsticles.Contains(position + velocity))
-                velocity.turnRight();//we would hit an obsticle
-            else
-                position += velocity;
-            return MoveResult.Ok;
-        }
     }
 }
+
+//TURN RIGHT LOGIC
+//x are rows, y are columns, increasing top to bottom and left to right
+//velocity x=1 --> moving down  (1,0)
+//velocity x=-1 --> moving up   (-1,0)
+//velocity y=1 --> moving right (0,1)
+//velocity y=-1 --> moving left (0,-1)
+//turn right is 
+// up       ->  right   ->  down    ->  left    ->  up
+// (-1,0)   ->  (0,1)   ->  (1,0)   ->  (0,-1)  ->  (-1,0)
+//turn right is
+// new X = old Y
+// new Y = -old X
+// so turnRight(x,y) => (y,-x)
