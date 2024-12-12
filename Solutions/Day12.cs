@@ -100,11 +100,6 @@ namespace AOC_2024
             for (int x = 0; x < _input.Length; x++)
                 for (int y = 0; y < _input[x].Length; y++)
                     tryRegisterLand(x, y, null);
-            foreach (var region in regions)
-            {
-                region.buildFence();
-                region.countSides();
-            }
         }
         public void tryRegisterLand(int x, int y, Region? region)
         {
@@ -132,6 +127,7 @@ namespace AOC_2024
             long ans = 0;
             foreach (var region in regions)
             {
+                region.buildFence();
                 ans += region.Area * region.Perimeter;
             }
             return new($"{ans}");
@@ -142,6 +138,7 @@ namespace AOC_2024
             long ans = 0;
             foreach (var region in regions)
             {
+                region.countSides();
                 ans += region.Area * region.Sides;
             }
             return new($"{ans}");
