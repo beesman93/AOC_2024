@@ -10,7 +10,8 @@ namespace AOC_2024
 {
     internal class Day15 : BaseDayWithInput
     {
-        const bool VISUALIZE = true;
+        const bool VISUALIZE = false;
+        const int SLOWMO_CHANGE_TRESHOLD = 15;
         enum tile
         {
             None = 0,
@@ -106,8 +107,22 @@ namespace AOC_2024
                     robotY += y;
 
                 }
+
                 if (visualize)
                 {
+                    int changeCount = 0;
+                    for (int xx = 0; xx < map.GetLength(0); xx++)
+                    {
+                        for (int yy = 0; yy < map.GetLength(1); yy++)
+                        {
+                            if (map[xx, yy] != mapClone[xx, yy])
+                            {
+                                changeCount++;
+                            }
+                        }
+                    }
+                    if (changeCount > SLOWMO_CHANGE_TRESHOLD)
+                        Thread.Sleep(1000);
                     for (int xx = 0; xx < map.GetLength(0); xx++)
                     {
                         for (int yy = 0; yy < map.GetLength(1); yy++)
@@ -118,27 +133,37 @@ namespace AOC_2024
                                 switch (map[xx, yy])
                                 {
                                     case tile.None:
-                                        Console.Write('.');
+                                        Console.Write(' ');
                                         break;
                                     case tile.Wall:
-                                        Console.Write('#');
+                                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                                        Console.Write('█');
+                                        Console.ForegroundColor = ConsoleColor.White;
                                         break;
                                     case tile.Box:
                                         Console.Write('O');
                                         break;
                                     case tile.Robot:
+                                        Console.ForegroundColor = ConsoleColor.Green;
                                         Console.Write('@');
+                                        Console.ForegroundColor = ConsoleColor.White;
                                         break;
                                     case tile.LeftBox:
+                                        Console.ForegroundColor = ConsoleColor.Yellow;
                                         Console.Write('[');
+                                        Console.ForegroundColor = ConsoleColor.White;
                                         break;
                                     case tile.RightBox:
+                                        Console.ForegroundColor = ConsoleColor.Yellow;
                                         Console.Write(']');
+                                        Console.ForegroundColor = ConsoleColor.White;
                                         break;
                                 }
                             }
                         }
                     }
+                    if (changeCount > SLOWMO_CHANGE_TRESHOLD)
+                        Thread.Sleep(1000);
                     if (instrCount < 2 || instrCount > instructions.Count - 3)
                         Thread.Sleep(500);
                     else if (instrCount < 10 || instrCount > instructions.Count - 10)
@@ -227,10 +252,12 @@ namespace AOC_2024
                     switch (map[x, y])
                     {
                         case tile.None:
-                            Console.Write('.');
+                            Console.Write(' ');
                             break;
                         case tile.Wall:
-                            Console.Write('#');
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            Console.Write('█');
+                            Console.ForegroundColor = ConsoleColor.White;
                             break;
                         case tile.Box:
                             Console.Write('O');
