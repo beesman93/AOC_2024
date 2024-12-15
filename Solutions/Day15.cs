@@ -10,6 +10,7 @@ namespace AOC_2024
 {
     internal class Day15 : BaseDayWithInput
     {
+        const bool VISUALIZE = true;
         enum tile
         {
             None = 0,
@@ -85,24 +86,75 @@ namespace AOC_2024
             }
 
         }
-        public override ValueTask<string> Solve_1() => new($"{solve(ref map1, robotInitPos.x, robotInitPos.y)}");
-        public override ValueTask<string> Solve_2() => new($"{solve(ref map2, robotInitPos.x*2, robotInitPos.y)}");
+        public override ValueTask<string> Solve_1() => new($"{solve(ref map1, robotInitPos.x, robotInitPos.y, visualize: VISUALIZE)}");
+        public override ValueTask<string> Solve_2() => new($"{solve(ref map2, robotInitPos.x*2, robotInitPos.y, visualize: VISUALIZE)}");
 
-        private long solve(ref tile[,] map, int robotX, int robotY)
+        private long solve(ref tile[,] map, int robotX, int robotY, bool visualize = false)
         {
+            if (visualize) Console.Clear();
+            if (visualize) Console.CursorVisible = false;
+            if (visualize) printMap(map);
+            tile[,] mapClone = null;
+            int instrCount = 0;
             long ans = 0;
             foreach (var (x, y) in instructions)
             {
+                if (visualize) mapClone = (tile[,])map.Clone();
                 if (move(ref map, robotX, robotY, x, y))
                 {
                     robotX += x;
                     robotY += y;
+
+                }
+                if (visualize)
+                {
+                    for (int xx = 0; xx < map.GetLength(0); xx++)
+                    {
+                        for (int yy = 0; yy < map.GetLength(1); yy++)
+                        {
+                            if (map[xx, yy] != mapClone[xx, yy])
+                            {
+                                Console.SetCursorPosition(xx, yy);
+                                switch (map[xx, yy])
+                                {
+                                    case tile.None:
+                                        Console.Write('.');
+                                        break;
+                                    case tile.Wall:
+                                        Console.Write('#');
+                                        break;
+                                    case tile.Box:
+                                        Console.Write('O');
+                                        break;
+                                    case tile.Robot:
+                                        Console.Write('@');
+                                        break;
+                                    case tile.LeftBox:
+                                        Console.Write('[');
+                                        break;
+                                    case tile.RightBox:
+                                        Console.Write(']');
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    if (instrCount < 2 || instrCount > instructions.Count - 3)
+                        Thread.Sleep(500);
+                    else if (instrCount < 10 || instrCount > instructions.Count - 10)
+                        Thread.Sleep(100);
+                    else if(instrCount < 50 || instrCount > instructions.Count - 50)
+                        Thread.Sleep(50);
+                    else if (instrCount < 100 || instrCount > instructions.Count - 100)
+                        Thread.Sleep(1);
+                    instrCount++;
                 }
             }
             for (int x = 0; x < map.GetLength(0); x++)
                 for (int y = 0; y < map.GetLength(1); y++)
                     if (map[x, y] == tile.Box || map[x,y] == tile.LeftBox)
                         ans += x + 100 * y;
+            if (visualize) Console.Clear();
             return ans;
         }
 

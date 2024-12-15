@@ -27,5 +27,5 @@ await Solver.Solve([typeof(Day15)], options =>
 {
     options.ShowConstructorElapsedTime = true;
     options.ShowOverallResults = true;
-    options.ClearConsole = false;
+    options.ClearConsole = true;
 });
