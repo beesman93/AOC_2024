@@ -16,14 +16,14 @@ namespace AOC_2024
         public override ValueTask<string> Solve_1()
         {
             long ans = 0;
-            throw new NotImplementedException();
+
             return new($"{ans}");
         }
 
         public override ValueTask<string> Solve_2()
         {
             long ans = 0;
-            throw new NotImplementedException();
+
             return new($"{ans}");
         }
     }

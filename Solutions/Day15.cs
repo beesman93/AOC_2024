@@ -16,238 +16,163 @@ namespace AOC_2024
             Wall = 1,
             Box = 2,
             Robot = 3,
-            BoxButt = 4,
+            LeftBox = 4,
+            RightBox = 5,
         }
-        tile[,] map;
+        tile[,] map1;
         tile[,] map2;
         List<(int x, int y)> instructions;
         (int x, int y) robotInitPos;
         public Day15()
         {
-            int Ymax = 0;
-            foreach(var line in _input)
-            {
-                if (line == "")
-                    break;
-                Ymax++;
-            }
-            map = new tile[_input[0].Length, Ymax];
-            map2 = new tile[_input[0].Length*2, Ymax];
+            int lineSplit = 0;
+            while (_input[lineSplit] != "") lineSplit++;
+            map1 = new tile[_input[0].Length, lineSplit];
+            map2 = new tile[_input[0].Length*2, lineSplit];
             instructions = [];
-            bool firstPart = true;
-            int y = 0;
-            foreach (var line in _input)
+            for(int y=0; y<lineSplit; y++)
             {
-                if(line=="")
+                for(int x = 0; x < _input[y].Length; x++)
                 {
-                    firstPart = false;
-                    continue;
-                }
-                if (firstPart)
-                {
-                    int x = 0;
-                    foreach (var c in line)
+                    switch (_input[y][x])
                     {
-                        switch (c)
-                        {
-                            case '#':
-                                map[x, y] = tile.Wall;
-                                map2[x * 2, y] = tile.Wall;
-                                map2[x * 2 + 1 , y] = tile.Wall;
-                                break;
-                            case '.':
-                                map[x, y] = tile.None;
-                                map2[x * 2, y] = tile.None;
-                                map2[x * 2 + 1, y] = tile.None;
-                                break;
-                            case 'O':
-                                map[x, y] = tile.Box;
-                                map2[x * 2, y] = tile.Box;
-                                map2[x * 2 + 1, y] = tile.BoxButt;
-                                break;
-                            case '@':
-                                map[x, y] = tile.Robot;
-                                map2[x * 2, y] = tile.Robot;
-                                map2[x * 2 + 1, y] = tile.None;
-                                robotInitPos = (x, y);
-                                break;
-                            default:
-                                throw new InvalidDataException("Invalid map.");
-                        }
-                        x++;
-                    }
-                    y++;
-                }
-                else
-                {
-                    foreach (char c in line)
-                    {
-                        switch (c)
-                        {
-                            case '^':
-                                instructions.Add((0, -1));
-                                break;
-                            case 'v':
-                                instructions.Add((0, 1));
-                                break;
-                            case '<':
-                                instructions.Add((-1, 0));
-                                break;
-                            case '>':
-                                instructions.Add((1, 0));
-                                break;
-                        }
+                        case '#':
+                            map1[x, y] = tile.Wall;
+                            map2[x * 2, y] = tile.Wall;
+                            map2[x * 2 + 1 , y] = tile.Wall;
+                            break;
+                        case '.':
+                            map1[x, y] = tile.None;
+                            map2[x * 2, y] = tile.None;
+                            map2[x * 2 + 1, y] = tile.None;
+                            break;
+                        case 'O':
+                            map1[x, y] = tile.Box;
+                            map2[x * 2, y] = tile.LeftBox;
+                            map2[x * 2 + 1, y] = tile.RightBox;
+                            break;
+                        case '@':
+                            map1[x, y] = tile.Robot;
+                            map2[x * 2, y] = tile.Robot;
+                            map2[x * 2 + 1, y] = tile.None;
+                            robotInitPos = (x, y);
+                            break;
+                        default:
+                            throw new InvalidDataException("Invalid map.");
                     }
                 }
-
             }
+            for (int y=lineSplit;y<_input.Length;y++)
+            {
+                foreach (char c in _input[y])
+                {
+                    switch (c)
+                    {
+                        case '^':
+                            instructions.Add((0, -1));
+                            break;
+                        case 'v':
+                            instructions.Add((0, 1));
+                            break;
+                        case '<':
+                            instructions.Add((-1, 0));
+                            break;
+                        case '>':
+                            instructions.Add((1, 0));
+                            break;
+                    }
+                }
+            }
+
         }
-        public override ValueTask<string> Solve_1()
+        public override ValueTask<string> Solve_1() => new($"{solve(ref map1, robotInitPos.x, robotInitPos.y)}");
+        public override ValueTask<string> Solve_2() => new($"{solve(ref map2, robotInitPos.x*2, robotInitPos.y)}");
+
+        private long solve(ref tile[,] map, int robotX, int robotY)
         {
             long ans = 0;
-            int robotX = robotInitPos.x;
-            int robotY = robotInitPos.y;
-            //printMap(false);
             foreach (var (x, y) in instructions)
             {
-                if (move(robotX, robotY, x, y))
+                if (move(ref map, robotX, robotY, x, y))
                 {
                     robotX += x;
                     robotY += y;
                 }
-                //printMap(false);
             }
-            //printMap(false);
             for (int x = 0; x < map.GetLength(0); x++)
-            {
                 for (int y = 0; y < map.GetLength(1); y++)
-                {
-                    if (map[x, y] == tile.Box)
-                        ans+=x+100*y;
-                }
-            }
-            return new($"{ans}");
-        }
-
-        public override ValueTask<string> Solve_2()
-        {
-            long ans = 0;
-            int robotX = robotInitPos.x * 2;
-            int robotY = robotInitPos.y;
-            //printMap(true);
-            int instNum = 1;
-            foreach (var (x, y) in instructions)
-            {
-                if (move2(robotX, robotY, x, y))
-                {
-                    robotX += x;
-                    robotY += y;
-                }
-                //printMap(true);
-                instNum++;
-            }
-            //printMap(true);
-            for (int x = 0; x < map2.GetLength(0); x++)
-            {
-                for (int y = 0; y < map2.GetLength(1); y++)
-                {
-                    if (map2[x, y] == tile.Box)
+                    if (map[x, y] == tile.Box || map[x,y] == tile.LeftBox)
                         ans += x + 100 * y;
-                }
-            }
-            return new($"{ans}");
+            return ans;
         }
 
-        private bool move2(int x, int y, int dx, int dy)
+        private bool move(ref tile[,]map, int x, int y, int dx, int dy)
         {
-            tile T = map2[x, y];
-            if (T == tile.Wall)
-                return false;
-            if (T == tile.None)
-                return true;
-            if (T == tile.Robot)
+            tile T = map[x, y];
+            if (T == tile.Wall) return false;
+            if (T == tile.None) return true;
+            if (T == tile.Robot || T == tile.Box)
             {
-                if (move2(x + dx, y + dy, dx, dy))
+                if (move(ref map, x + dx, y + dy, dx, dy))
                 {
-                    map2[x + dx, y + dy] = T;
-                    map2[x, y] = tile.None;
+                    map[x + dx, y + dy] = T;
+                    map[x, y] = tile.None;
                     return true;
                 }
+                return false;
             }
-            //if (T == tile.Box || T == tile.BoxButt)
-            int xBox = x;
-            int yBox = y;
-            int xBoxButt = x;
-            int yBoxButt = y;
-            if (T == tile.BoxButt) xBox--;
-            if (T == tile.Box) xBoxButt++;
+            //(T == tile.LeftBox || T == tile.RightBox) -- part 2
+            int xLeftBox = x;
+            int yLeftBox = y;
+            int xRightBox = x;
+            int yRightBox = y;
+            if (T == tile.RightBox) xLeftBox--;
+            if (T == tile.LeftBox) xRightBox++;
             if (dx == 0)//up and down, just check both box parts can move
             {
                 /*
                  * if one side fails, the other side should not move, revert changes down the line
                  */
-                var map2Copy = (tile[,])map2.Clone();
-                if (move2(xBox+dx, yBox+dy, dx, dy) && move2(xBoxButt+dx, yBoxButt+dy, dx, dy))
+                var mapCopy = (tile[,])map.Clone();
+                if (move(ref map,xLeftBox+dx, yLeftBox+dy, dx, dy) && move(ref map,xRightBox+dx, yRightBox+dy, dx, dy))
                 {
-                    map2[xBox + dx, yBox + dy] = tile.Box;
-                    map2[xBoxButt + dx, yBoxButt + dy] = tile.BoxButt;
-                    map2[xBox, yBox] = tile.None;
-                    map2[xBoxButt, yBoxButt] = tile.None;
+                    map[xLeftBox + dx, yLeftBox + dy] = tile.LeftBox;
+                    map[xRightBox + dx, yRightBox + dy] = tile.RightBox;
+                    map[xLeftBox, yLeftBox] = tile.None;
+                    map[xRightBox, yRightBox] = tile.None;
                     return true;
                 }
-                map2 = map2Copy;
-                return false;
+                map = mapCopy;
             }
-            if (dx > 0)//right --> check for boxButt like it was robot
+            else if (dx > 0)//right --> check for RightBox like it was robot
             {
-                if (move2(xBoxButt+dx, yBoxButt+dy, dx, dy))
+                if (move(ref map, xRightBox+dx, yRightBox+dy, dx, dy))
                 {
-                    map2[xBox + dx, yBox + dy] = tile.Box;
-                    map2[xBoxButt + dx, yBoxButt + dy] = tile.BoxButt;
-                    map2[x, y] = tile.None;
+                    map[xLeftBox + dx, yLeftBox + dy] = tile.LeftBox;
+                    map[xRightBox + dx, yRightBox + dy] = tile.RightBox;
+                    map[x, y] = tile.None;
                     return true;
                 }
-                return false;
             }
-            if(dx<0)//left --> check for box like it was robot
+            else if(dx<0)//left --> check for LeftBox like it was robot
             {
-                if (move2(xBox + dx, yBox + dy, dx, dy))
+                if (move(ref map, xLeftBox + dx, yLeftBox + dy, dx, dy))
                 {
-                    map2[xBox + dx, yBox + dy] = tile.Box;
-                    map2[xBoxButt + dx, yBoxButt + dy] = tile.BoxButt;
-                    map2[x, y] = tile.None;
+                    map[xLeftBox + dx, yLeftBox + dy] = tile.LeftBox;
+                    map[xRightBox + dx, yRightBox + dy] = tile.RightBox;
+                    map[x, y] = tile.None;
                     return true;
                 }
-                return false;
             }
             return false;
         }
-
-        private bool move(int x, int y, int dx, int dy)
+        private void printMap(tile[,] map)
         {
-            tile T = map[x, y];
-            if (T == tile.Wall)
-                return false;
-            if (T == tile.None)
-                return true;
-            //if (T == tile.Box || T == tile.Robot)
-            if (move(x + dx, y + dy, dx, dy))
+            for (int y = 0; y < map.GetLength(1); y++)
             {
-                map[x + dx, y + dy] = T;
-                map[x, y] = tile.None;
-                return true;
-            }
-            return false;
-        }
-
-        private void printMap(bool p2)
-        {
-            var pMap = p2 ? this.map2 : this.map;
-            for (int y = 0; y < pMap.GetLength(1); y++)
-            {
-                for (int x = 0; x < pMap.GetLength(0); x++)
+                for (int x = 0; x < map.GetLength(0); x++)
                 {
-                    switch (pMap[x, y])
+                    switch (map[x, y])
                     {
                         case tile.None:
                             Console.Write('.');
@@ -256,12 +181,15 @@ namespace AOC_2024
                             Console.Write('#');
                             break;
                         case tile.Box:
-                            Console.Write(p2?'[':'O');
+                            Console.Write('O');
                             break;
                         case tile.Robot:
                             Console.Write('@');
                             break;
-                        case tile.BoxButt:
+                        case tile.LeftBox:
+                            Console.Write('[');
+                            break;
+                        case tile.RightBox:
                             Console.Write(']');
                             break;
                     }
