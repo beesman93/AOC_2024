@@ -121,7 +121,8 @@ namespace AOC_2024
             ulong knownLastDigits = 0b0;
             ulong incrementBy = 0b1;
             int wantedOutTapeCount = 4;
-            int sampleSize = 5;
+            int maxTapeCount = 11;
+            int sampleSize = 3;
             while (true)
             {
                 if (PRINT_HINTS) Console.WriteLine($"-----wantedOutTapeCount = {wantedOutTapeCount}");
@@ -139,16 +140,19 @@ namespace AOC_2024
                                 break;
                             if (chronospacial.instructions[chronospacial.OutTape.Count - 1] != chronospacial.OutTape.Last())
                                 break;
-                            if (chronospacial.OutTape.Count == wantedOutTapeCount)
+                            if (wantedOutTapeCount < maxTapeCount && chronospacial.OutTape.Count == wantedOutTapeCount)
                             {
                                 if (PRINT_HINTS) Console.WriteLine($"0b{Convert.ToString((long)ans, 2)}");
                                 answersForCurrentOutTapeCount.Add(ans);
                             }
                             if (chronospacial.OutTape.Count == chronospacial.instructions.Count)
+                            {
+                                if (PRINT_HINTS) Console.WriteLine($"ANSWER 0b{Convert.ToString((long)ans, 2)}");
                                 return new($"{ans}");
+                            }
                         }
                     }
-                    if (answersForCurrentOutTapeCount.Count >= sampleSize)
+                    if (wantedOutTapeCount<maxTapeCount && answersForCurrentOutTapeCount.Count >= sampleSize)
                     {
                         knownLastDigits = answersForCurrentOutTapeCount.First();
                         foreach (var item in answersForCurrentOutTapeCount)
