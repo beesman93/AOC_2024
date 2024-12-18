@@ -11,18 +11,20 @@ namespace AOC_2024
     internal class Day18 : BaseDayWithInput
     {
         const int SIZE = 71;
-        const int BYTES_FALL = 1024;
+        const int BYTES_FALL_P1 = 1024;
         (int x, int y) start = (0, 0);
         (int x, int y) end = (SIZE - 1, SIZE - 1);
+        List<(int x, int y)> obsticles;
         bool[,] grid;
         public Day18()
         {
-            grid = new bool[SIZE,SIZE];
-            for (int i = 0; i < BYTES_FALL; i++)
+            obsticles = [];
+            grid = new bool[SIZE, SIZE];
+            for (int i = 0; i < _input.Length; i++)
             {
                 int x = Convert.ToInt32(_input[i].Split(',')[0]);
                 int y = Convert.ToInt32(_input[i].Split(',')[1]);
-                grid[x, y] = true;
+                obsticles.Add((x, y));
             }
 
         }
@@ -34,24 +36,24 @@ namespace AOC_2024
             (0, -1)
         };
 
-        public override ValueTask<string> Solve_1()
+        public int solve(int bitCount)
         {
-            long ans = 0;
-            int shortestDistance = int.MaxValue;
+            grid= new bool[SIZE, SIZE];
+            for(int i=0;i<bitCount;i++)
+                grid[obsticles[i].x, obsticles[i].y] = true;
             PriorityQueue<(int x, int y), int> queue = new();
             queue.Enqueue((start.x, start.y), 0);
-            Dictionary<(int x, int y),int> distances = new();
+            Dictionary<(int x, int y), int> distances = new();
             while (queue.TryDequeue(out var node, out int distance))
             {
                 if (distances.ContainsKey(node))
                     continue;
                 if (node.x == end.x && node.y == end.y)
                 {
-                    shortestDistance = distance;
-                    break;
+                    return distance;
                 }
                 distances[node] = distance;
-                foreach(var dir in dirs)
+                foreach (var dir in dirs)
                 {
                     int x = node.x + dir.x;
                     int y = node.y + dir.y;
@@ -62,48 +64,32 @@ namespace AOC_2024
                     queue.Enqueue((x, y), distance + 1);
                 }
             }
-            return new($"{shortestDistance}");
+            return -1;
+        }
+
+        public override ValueTask<string> Solve_1()
+        {
+            return new($"{solve(BYTES_FALL_P1)}");
         }
 
         public override ValueTask<string> Solve_2()
         {
-            for (int i = BYTES_FALL; i < _input.Length; i++)
+            int WORKING_OBS_CNT = BYTES_FALL_P1;
+            int NOT_WORKING_OBS_CNT = _input.Length;
+            while(WORKING_OBS_CNT + 1 < NOT_WORKING_OBS_CNT)
             {
-                int xx = Convert.ToInt32(_input[i].Split(',')[0]);
-                int yy = Convert.ToInt32(_input[i].Split(',')[1]);
-                grid[xx, yy] = true;
-
-                PriorityQueue<(int x, int y), int> queue = new();
-                queue.Enqueue((start.x, start.y), 0);
-                Dictionary<(int x, int y), int> distances = new();
-                bool solved = false;
-                while (queue.TryDequeue(out var node, out int distance))
+                int mid = (WORKING_OBS_CNT + NOT_WORKING_OBS_CNT) / 2;
+                if (solve(mid) == -1)
                 {
-                    if (distances.ContainsKey(node))
-                        continue;
-                    if (node.x == end.x && node.y == end.y)
-                    {
-                        solved = true;
-                        break;
-                    }
-                    distances[node] = distance;
-                    foreach (var dir in dirs)
-                    {
-                        int x = node.x + dir.x;
-                        int y = node.y + dir.y;
-                        if (x < 0 || x >= SIZE || y < 0 || y >= SIZE || grid[x, y])
-                            continue;
-                        if (distances.ContainsKey((x, y)))
-                            continue;
-                        queue.Enqueue((x, y), distance + 1);
-                    }
+                    NOT_WORKING_OBS_CNT = mid;
                 }
-                if (!solved)
-                    return new($"{xx},{yy}");
+                else
+                {
+                    WORKING_OBS_CNT = mid;
+                }
             }
-            return new("no solution");
+            return new($"{obsticles[NOT_WORKING_OBS_CNT-1].x},{obsticles[NOT_WORKING_OBS_CNT - 1].y}");
         }
-
         public void printGrid()
         {
             for (int y = 0; y < SIZE; y++)
