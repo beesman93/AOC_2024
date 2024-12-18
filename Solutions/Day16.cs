@@ -10,27 +10,27 @@ namespace AOC_2024
     internal class Day16 : BaseDayWithInput
     {
         const int TURN_PENTALTY = 1000;
-        enum tile
+        enum Tile
         {
             empty,
             wall,
             start,
             end
         }
-        private static tile CharToTile(char c) => c switch
+        private static Tile CharToTile(char c) => c switch
         {
-            '.' => tile.empty,
-            '#' => tile.wall,
-            'S' => tile.start,
-            'E' => tile.end,
+            '.' => Tile.empty,
+            '#' => Tile.wall,
+            'S' => Tile.start,
+            'E' => Tile.end,
             _ => throw new InvalidDataException("Invalid character.")
         };
-        private static char TileToChar(tile t) => t switch
+        private static char TileToChar(Tile t) => t switch
         {
-            tile.empty => '.',
-            tile.wall => '#',
-            tile.start => 'S',
-            tile.end => 'E',
+            Tile.empty => '.',
+            Tile.wall => '#',
+            Tile.start => 'S',
+            Tile.end => 'E',
             _ => throw new InvalidDataException("Unknown tile.")
         };
 
@@ -39,7 +39,7 @@ namespace AOC_2024
         private static int turnRight(int dirrectionsIdx) => (dirrectionsIdx + 1) % 4;
         private static int turnBack(int dirrectionsIdx) => (dirrectionsIdx + 2) % 4;
 
-        tile[,] maze;//x,y x is column (0->N left to right) y is row (0->M top to bottom)
+        Tile[,] maze;//x,y x is column (0->N left to right) y is row (0->M top to bottom)
         (int x, int y) start;
         (int x, int y) end;
         Dictionary<(int x, int y, int dir), int> distancesToEnd;
@@ -48,16 +48,18 @@ namespace AOC_2024
 
         public Day16()
         {
-            maze = new tile[_input[0].Length, _input.Length];
+            maze = new Tile[_input[0].Length, _input.Length];
             for (int y = 0; y < _input.Length; y++)
             {
                 for (int x = 0; x < _input[y].Length; x++)
                 {
                     maze[x, y] = CharToTile(_input[y][x]);
-                    if (maze[x, y] == tile.start)   start = (x, y);
-                    if (maze[x, y] == tile.end)     end = (x, y);
+                    if (maze[x, y] == Tile.start)   start = (x, y);
+                    if (maze[x, y] == Tile.end)     end = (x, y);
                 }
             }
+            distancesToEnd = [];
+            distancesToStart = [];
         }
         public override ValueTask<string> Solve_1()
         {
@@ -74,7 +76,7 @@ namespace AOC_2024
                 distancesToEnd[node] = distance;
                 int newX = node.x + dirrections[node.dir].x;
                 int newY = node.y + dirrections[node.dir].y;
-                if (newX >= 0 && newX < maze.GetLength(0) && newY >= 0 && newY < maze.GetLength(1) && maze[newX, newY] != tile.wall)
+                if (newX >= 0 && newX < maze.GetLength(0) && newY >= 0 && newY < maze.GetLength(1) && maze[newX, newY] != Tile.wall)
                     queue.Enqueue((newX, newY, node.dir), distance + 1);
                 queue.Enqueue((node.x, node.y, turnRight(node.dir)), distance + TURN_PENTALTY);
                 queue.Enqueue((node.x, node.y, turnLeft(node.dir)), distance + TURN_PENTALTY);
@@ -100,7 +102,7 @@ namespace AOC_2024
                 distancesToStart[node] = distance;
                 int newX = node.x + dirrections[turnBack(node.dir)].x;
                 int newY = node.y + dirrections[turnBack(node.dir)].y;
-                if (newX >= 0 && newX < maze.GetLength(0) && newY >= 0 && newY < maze.GetLength(1) && maze[newX, newY] != tile.wall)
+                if (newX >= 0 && newX < maze.GetLength(0) && newY >= 0 && newY < maze.GetLength(1) && maze[newX, newY] != Tile.wall)
                     queue.Enqueue((newX, newY, node.dir), distance + 1);
                 queue.Enqueue((node.x, node.y, turnRight(node.dir)), distance + TURN_PENTALTY);
                 queue.Enqueue((node.x, node.y, turnLeft(node.dir)), distance + TURN_PENTALTY);

@@ -9,29 +9,29 @@ namespace AOC_2024
 {
     internal class Day08 : BaseDayWithInput
     {
-        record coord
+        record Coord
         {
             public int col;
             public int row;
 
-            public coord() => (col, row) = (0, 0);
-            public coord(int col, int row)//col, row constructor
+            public Coord() => (col, row) = (0, 0);
+            public Coord(int col, int row)//col, row constructor
                 => (this.col, this.row) = (col, row);
-            public coord(coord c)//copy constructor
+            public Coord(Coord c)//copy constructor
                 => (col, row) = (c.col, c.row);
             //adding, subtracting
-            public static coord operator +(coord a, coord b)
+            public static Coord operator +(Coord a, Coord b)
                 => new(a.col + b.col, a.row + b.row);
-            public static coord operator -(coord a, coord b)
+            public static Coord operator -(Coord a, Coord b)
                  => new(a.col - b.col, a.row - b.row);
         }
 
-        Dictionary<char, HashSet<coord>> nodes;
-        coord mapSize;
+        Dictionary<char, HashSet<Coord>> nodes;
+        Coord mapSize;
         public Day08()
         {
             nodes = [];
-            mapSize = new coord(_input[0].Length, _input.Length);
+            mapSize = new Coord(_input[0].Length, _input.Length);
             for (int row = 0; row < _input.Length; row++)
             {   
                 for(int col = 0; col < _input[row].Length; col++)
@@ -41,25 +41,24 @@ namespace AOC_2024
                         continue;
                     if(!nodes.ContainsKey(c))
                         nodes.Add(c, []);
-                    nodes[c].Add(new coord(col, row));
+                    nodes[c].Add(new Coord(col, row));
                 }
             }
         }
         public override ValueTask<string> Solve_1()
         {
-            long ans = 0;
-            HashSet<coord> antinodes = [];
+            HashSet<Coord> antinodes = [];
             foreach (var nodeKV in nodes)
             {
                 char c = nodeKV.Key;
-                HashSet<coord> coords = nodeKV.Value;
+                HashSet<Coord> coords = nodeKV.Value;
                 for (int i = 0; i < coords.Count; i++)
                 {
                     for (int j = i + 1; j < coords.Count; j++)
                     {
-                        coord distance = coords.ElementAt(j) - coords.ElementAt(i);
-                        coord firstAntinode = coords.ElementAt(i) - distance;
-                        coord secondAntinode = coords.ElementAt(j) + distance;
+                        Coord distance = coords.ElementAt(j) - coords.ElementAt(i);
+                        Coord firstAntinode = coords.ElementAt(i) - distance;
+                        Coord secondAntinode = coords.ElementAt(j) + distance;
                         if (firstAntinode.col >= 0 && firstAntinode.col < mapSize.col
                         && firstAntinode.row >= 0 && firstAntinode.row < mapSize.row)
                             antinodes.Add(firstAntinode);
@@ -74,22 +73,21 @@ namespace AOC_2024
 
         public override ValueTask<string> Solve_2()
         {
-            long ans = 0;
-            HashSet<coord> antinodes = [];
+            HashSet<Coord> antinodes = [];
             foreach (var nodeKV in nodes)
             {
                 char c = nodeKV.Key;
-                HashSet<coord> coords = nodeKV.Value;
+                HashSet<Coord> coords = nodeKV.Value;
                 for (int i = 0; i < coords.Count; i++)
                 {
                     for (int j = i + 1; j < coords.Count; j++)
                     {
-                        coord distance = coords.ElementAt(j) - coords.ElementAt(i);
-                        coord firstAntinode = coords.ElementAt(i);
-                        coord secondAntinode = coords.ElementAt(j);
+                        Coord distance = coords.ElementAt(j) - coords.ElementAt(i);
+                        Coord firstAntinode = coords.ElementAt(i);
+                        Coord secondAntinode = coords.ElementAt(j);
                         antinodes.Add(firstAntinode);
                         antinodes.Add(secondAntinode);
-                        coord move = new(firstAntinode);
+                        Coord move = new(firstAntinode);
                         while (move.col >= 0 && move.col < mapSize.col
                             && move.row >= 0 && move.row < mapSize.row)
                         {

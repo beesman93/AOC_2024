@@ -12,7 +12,7 @@ namespace AOC_2024
     {
         const int BATHROOM_WIDTH = 101;
         const int BATHROOM_HEIGHT = 103;
-        enum quadrant
+        enum Quadrant
         {
             top_left,
             top_right,
@@ -29,29 +29,29 @@ namespace AOC_2024
 
             private readonly (int x, int y) _velocity;
 
-            public quadrant Quadrant
+            public Quadrant Quadrant
             {
                 get
                 {
                     if (X < XX / 2 && Y < YY / 2)
                     {
-                        return quadrant.top_left;
+                        return Quadrant.top_left;
                     }
                     else if (X > XX / 2 && Y < YY / 2)
                     {
-                        return quadrant.top_right;
+                        return Quadrant.top_right;
                     }
                     else if (X < XX / 2 && Y > YY / 2)
                     {
-                        return quadrant.bottom_left;
+                        return Quadrant.bottom_left;
                     }
                     else if (X > XX / 2 && Y > YY / 2)
                     {
-                        return quadrant.bottom_right;
+                        return Quadrant.bottom_right;
                     }
                     else
                     {
-                        return quadrant.middle;
+                        return Quadrant.middle;
                     }
                 }
             }
@@ -87,18 +87,18 @@ namespace AOC_2024
                 robots.Add(new Robot(line));
             }
         }
-        public override async ValueTask<string> Solve_1()
+        public override ValueTask<string> Solve_1()
         {
             for(int i =0;i<100;i++) robots.ForEach(robot => robot.Move());
-            Dictionary<quadrant, int> quad_count = [];
-            foreach(quadrant quad in Enum.GetValues(typeof(quadrant)))
+            Dictionary<Quadrant, int> quad_count = [];
+            foreach(Quadrant quad in Enum.GetValues(typeof(Quadrant)))
                 quad_count[quad] = 0;
             foreach (var robot in robots)
                 quad_count[robot.Quadrant]++;
-            return new($"{quad_count[quadrant.top_left]
-                * quad_count[quadrant.top_right]
-                * quad_count[quadrant.bottom_right]
-                * quad_count[quadrant.bottom_left]
+            return new($"{quad_count[Quadrant.top_left]
+                * quad_count[Quadrant.top_right]
+                * quad_count[Quadrant.bottom_right]
+                * quad_count[Quadrant.bottom_left]
                 }");
         }
 

@@ -12,7 +12,7 @@ namespace AOC_2024
     {
         const bool VISUALIZE = false;
         const int SLOWMO_CHANGE_TRESHOLD = 15;
-        enum tile
+        enum Tile
         {
             None = 0,
             Wall = 1,
@@ -21,16 +21,16 @@ namespace AOC_2024
             LeftBox = 4,
             RightBox = 5,
         }
-        tile[,] map1;
-        tile[,] map2;
+        Tile[,] map1;
+        Tile[,] map2;
         List<(int x, int y)> instructions;
         (int x, int y) robotInitPos;
         public Day15()
         {
             int lineSplit = 0;
             while (_input[lineSplit] != "") lineSplit++;
-            map1 = new tile[_input[0].Length, lineSplit];
-            map2 = new tile[_input[0].Length*2, lineSplit];
+            map1 = new Tile[_input[0].Length, lineSplit];
+            map2 = new Tile[_input[0].Length*2, lineSplit];
             instructions = [];
             for(int y=0; y<lineSplit; y++)
             {
@@ -39,24 +39,24 @@ namespace AOC_2024
                     switch (_input[y][x])
                     {
                         case '#':
-                            map1[x, y] = tile.Wall;
-                            map2[x * 2, y] = tile.Wall;
-                            map2[x * 2 + 1 , y] = tile.Wall;
+                            map1[x, y] = Tile.Wall;
+                            map2[x * 2, y] = Tile.Wall;
+                            map2[x * 2 + 1 , y] = Tile.Wall;
                             break;
                         case '.':
-                            map1[x, y] = tile.None;
-                            map2[x * 2, y] = tile.None;
-                            map2[x * 2 + 1, y] = tile.None;
+                            map1[x, y] = Tile.None;
+                            map2[x * 2, y] = Tile.None;
+                            map2[x * 2 + 1, y] = Tile.None;
                             break;
                         case 'O':
-                            map1[x, y] = tile.Box;
-                            map2[x * 2, y] = tile.LeftBox;
-                            map2[x * 2 + 1, y] = tile.RightBox;
+                            map1[x, y] = Tile.Box;
+                            map2[x * 2, y] = Tile.LeftBox;
+                            map2[x * 2 + 1, y] = Tile.RightBox;
                             break;
                         case '@':
-                            map1[x, y] = tile.Robot;
-                            map2[x * 2, y] = tile.Robot;
-                            map2[x * 2 + 1, y] = tile.None;
+                            map1[x, y] = Tile.Robot;
+                            map2[x * 2, y] = Tile.Robot;
+                            map2[x * 2 + 1, y] = Tile.None;
                             robotInitPos = (x, y);
                             break;
                         default:
@@ -90,17 +90,17 @@ namespace AOC_2024
         public override ValueTask<string> Solve_1() => new($"{solve(ref map1, robotInitPos.x, robotInitPos.y, visualize: VISUALIZE)}");
         public override ValueTask<string> Solve_2() => new($"{solve(ref map2, robotInitPos.x*2, robotInitPos.y, visualize: VISUALIZE)}");
 
-        private long solve(ref tile[,] map, int robotX, int robotY, bool visualize = false)
+        private long solve(ref Tile[,] map, int robotX, int robotY, bool visualize = false)
         {
             if (visualize) Console.Clear();
             if (visualize) Console.CursorVisible = false;
             if (visualize) printMap(map);
-            tile[,] mapClone = null;
+            Tile[,] mapClone=new Tile[0,0];
             int instrCount = 0;
             long ans = 0;
             foreach (var (x, y) in instructions)
             {
-                if (visualize) mapClone = (tile[,])map.Clone();
+                if (visualize) mapClone = (Tile[,])map.Clone();
                 if (move(ref map, robotX, robotY, x, y))
                 {
                     robotX += x;
@@ -132,28 +132,28 @@ namespace AOC_2024
                                 Console.SetCursorPosition(xx, yy);
                                 switch (map[xx, yy])
                                 {
-                                    case tile.None:
+                                    case Tile.None:
                                         Console.Write(' ');
                                         break;
-                                    case tile.Wall:
+                                    case Tile.Wall:
                                         Console.ForegroundColor = ConsoleColor.DarkRed;
                                         Console.Write('█');
                                         Console.ForegroundColor = ConsoleColor.White;
                                         break;
-                                    case tile.Box:
+                                    case Tile.Box:
                                         Console.Write('O');
                                         break;
-                                    case tile.Robot:
+                                    case Tile.Robot:
                                         Console.ForegroundColor = ConsoleColor.Green;
                                         Console.Write('@');
                                         Console.ForegroundColor = ConsoleColor.White;
                                         break;
-                                    case tile.LeftBox:
+                                    case Tile.LeftBox:
                                         Console.ForegroundColor = ConsoleColor.Yellow;
                                         Console.Write('[');
                                         Console.ForegroundColor = ConsoleColor.White;
                                         break;
-                                    case tile.RightBox:
+                                    case Tile.RightBox:
                                         Console.ForegroundColor = ConsoleColor.Yellow;
                                         Console.Write(']');
                                         Console.ForegroundColor = ConsoleColor.White;
@@ -177,23 +177,23 @@ namespace AOC_2024
             }
             for (int x = 0; x < map.GetLength(0); x++)
                 for (int y = 0; y < map.GetLength(1); y++)
-                    if (map[x, y] == tile.Box || map[x,y] == tile.LeftBox)
+                    if (map[x, y] == Tile.Box || map[x,y] == Tile.LeftBox)
                         ans += x + 100 * y;
             if (visualize) Console.Clear();
             return ans;
         }
 
-        private bool move(ref tile[,]map, int x, int y, int dx, int dy)
+        private bool move(ref Tile[,]map, int x, int y, int dx, int dy)
         {
-            tile T = map[x, y];
-            if (T == tile.Wall) return false;
-            if (T == tile.None) return true;
-            if (T == tile.Robot || T == tile.Box)
+            Tile T = map[x, y];
+            if (T == Tile.Wall) return false;
+            if (T == Tile.None) return true;
+            if (T == Tile.Robot || T == Tile.Box)
             {
                 if (move(ref map, x + dx, y + dy, dx, dy))
                 {
                     map[x + dx, y + dy] = T;
-                    map[x, y] = tile.None;
+                    map[x, y] = Tile.None;
                     return true;
                 }
                 return false;
@@ -203,20 +203,20 @@ namespace AOC_2024
             int yLeftBox = y;
             int xRightBox = x;
             int yRightBox = y;
-            if (T == tile.RightBox) xLeftBox--;
-            if (T == tile.LeftBox) xRightBox++;
+            if (T == Tile.RightBox) xLeftBox--;
+            if (T == Tile.LeftBox) xRightBox++;
             if (dx == 0)//up and down, just check both box parts can move
             {
                 /*
                  * if one side fails, the other side should not move, revert changes down the line
                  */
-                var mapCopy = (tile[,])map.Clone();
+                var mapCopy = (Tile[,])map.Clone();
                 if (move(ref map,xLeftBox+dx, yLeftBox+dy, dx, dy) && move(ref map,xRightBox+dx, yRightBox+dy, dx, dy))
                 {
-                    map[xLeftBox + dx, yLeftBox + dy] = tile.LeftBox;
-                    map[xRightBox + dx, yRightBox + dy] = tile.RightBox;
-                    map[xLeftBox, yLeftBox] = tile.None;
-                    map[xRightBox, yRightBox] = tile.None;
+                    map[xLeftBox + dx, yLeftBox + dy] = Tile.LeftBox;
+                    map[xRightBox + dx, yRightBox + dy] = Tile.RightBox;
+                    map[xLeftBox, yLeftBox] = Tile.None;
+                    map[xRightBox, yRightBox] = Tile.None;
                     return true;
                 }
                 map = mapCopy;
@@ -225,9 +225,9 @@ namespace AOC_2024
             {
                 if (move(ref map, xRightBox+dx, yRightBox+dy, dx, dy))
                 {
-                    map[xLeftBox + dx, yLeftBox + dy] = tile.LeftBox;
-                    map[xRightBox + dx, yRightBox + dy] = tile.RightBox;
-                    map[x, y] = tile.None;
+                    map[xLeftBox + dx, yLeftBox + dy] = Tile.LeftBox;
+                    map[xRightBox + dx, yRightBox + dy] = Tile.RightBox;
+                    map[x, y] = Tile.None;
                     return true;
                 }
             }
@@ -235,15 +235,15 @@ namespace AOC_2024
             {
                 if (move(ref map, xLeftBox + dx, yLeftBox + dy, dx, dy))
                 {
-                    map[xLeftBox + dx, yLeftBox + dy] = tile.LeftBox;
-                    map[xRightBox + dx, yRightBox + dy] = tile.RightBox;
-                    map[x, y] = tile.None;
+                    map[xLeftBox + dx, yLeftBox + dy] = Tile.LeftBox;
+                    map[xRightBox + dx, yRightBox + dy] = Tile.RightBox;
+                    map[x, y] = Tile.None;
                     return true;
                 }
             }
             return false;
         }
-        private void printMap(tile[,] map)
+        private void printMap(Tile[,] map)
         {
             for (int y = 0; y < map.GetLength(1); y++)
             {
@@ -251,24 +251,24 @@ namespace AOC_2024
                 {
                     switch (map[x, y])
                     {
-                        case tile.None:
+                        case Tile.None:
                             Console.Write(' ');
                             break;
-                        case tile.Wall:
+                        case Tile.Wall:
                             Console.ForegroundColor = ConsoleColor.DarkGray;
                             Console.Write('█');
                             Console.ForegroundColor = ConsoleColor.White;
                             break;
-                        case tile.Box:
+                        case Tile.Box:
                             Console.Write('O');
                             break;
-                        case tile.Robot:
+                        case Tile.Robot:
                             Console.Write('@');
                             break;
-                        case tile.LeftBox:
+                        case Tile.LeftBox:
                             Console.Write('[');
                             break;
-                        case tile.RightBox:
+                        case Tile.RightBox:
                             Console.Write(']');
                             break;
                     }

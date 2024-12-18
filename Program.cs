@@ -23,7 +23,7 @@ using AoCHelper;
  *  *   optimize Day14 part 2               (159ms)
  */
 
-await Solver.Solve([typeof(Day18)], options =>
+await Solver.Solve([typeof(Day19)], options =>
 {
     options.ShowConstructorElapsedTime = true;
     options.ShowOverallResults = true;

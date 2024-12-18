@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -81,7 +82,7 @@ namespace AOC_2024
             }
 
             public int Size() => end - start + 1;
-            public string ToString()
+            public override string ToString()
             {
                 return $"{start}::{end} ({this.Size()}) = {value}";
             }
@@ -108,8 +109,8 @@ namespace AOC_2024
             HashSet<int> toDefrag = [];
             for(int ii = memBlocks.Count() - 1; ii >= 0; ii--)
             {
-                if (memBlocks[ii].value != null)
-                    toDefrag.Add(memBlocks[ii].value.Value);
+                if (memBlocks[ii].value.HasValue)
+                    toDefrag.Add(memBlocks[ii].value.GetValueOrDefault(-1));
             }
 
             foreach (int val in toDefrag)
