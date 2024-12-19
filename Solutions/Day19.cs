@@ -22,11 +22,10 @@ namespace AOC_2024
             cache = [];
         }
         public override ValueTask<string> Solve_1() => new($"{texts.AsParallel().Count(text => GetToEnd(text) > 0)}");
-        public override ValueTask<string> Solve_2() => new($"{texts.AsParallel().Sum(text => GetToEnd(text))}");
+        public override ValueTask<string> Solve_2() => new($"{texts.AsParallel().Sum(GetToEnd)}");
         long GetToEnd(string remain)
         {
-            if (cache.TryGetValue(remain, out long val))
-                return val;
+            if (cache.TryGetValue(remain, out long val)) return val;
             if (remain.Length == 0) return 1;
             long tot = 0;
             foreach(var towel in towels)
@@ -35,15 +34,12 @@ namespace AOC_2024
                 {
                     if (remain[..towel.Length]==towel)
                     {
-                        long curr = GetToEnd(remain[towel.Length..]);
-                        tot += curr;
+                        tot += GetToEnd(remain[towel.Length..]);
                     }
                 }
             }
             cache[remain] = tot;
             return tot;
         }
-
-
     }
 }
