@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
 using AoCHelper;
 
 namespace AOC_2024
@@ -19,27 +12,14 @@ namespace AOC_2024
         {
             towels = [.. _input[0].Split(", ")];
             texts = _input[2.._input.Length];
-            cache = [];
+            cache = new(new Dictionary<string, long>() { { "", 1 } });
         }
-        public override ValueTask<string> Solve_1() => new($"{texts.AsParallel().Count(text => GetToEnd(text) > 0)}");
-        public override ValueTask<string> Solve_2() => new($"{texts.AsParallel().Sum(GetToEnd)}");
-        long GetToEnd(string remain)
+        public override ValueTask<string> Solve_1() => new($"{texts.AsParallel().Count(t => GetToEnd(t) > 0)}");
+        public override ValueTask<string> Solve_2() => new($"{texts.Sum(GetToEnd)}");
+        long GetToEnd(string r)
         {
-            if (cache.TryGetValue(remain, out long val)) return val;
-            if (remain.Length == 0) return 1;
-            long tot = 0;
-            foreach(var towel in towels)
-            {
-                if (remain[0] == towel[0]&&towel.Length<=remain.Length)
-                {
-                    if (remain[..towel.Length]==towel)
-                    {
-                        tot += GetToEnd(remain[towel.Length..]);
-                    }
-                }
-            }
-            cache[remain] = tot;
-            return tot;
+            if (cache.TryGetValue(r, out long val)) return val;
+            return cache[r] = towels.Where(t => t[0] == r[0] && t.Length <= r.Length && r[..t.Length] == t).Sum(towel => GetToEnd(r[towel.Length..]));
         }
     }
 }
