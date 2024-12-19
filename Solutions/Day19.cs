@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -10,79 +12,35 @@ namespace AOC_2024
 {
     internal class Day19 : BaseDayWithInput
     {
-        List<string> towels;
-        List<string> texts;
+        readonly string[] towels;
+        readonly string[] texts;
+        readonly ConcurrentDictionary<string, long> cache;
         public Day19()
         {
-            towels = _input[0].Split(",").ToList<string>();
-            for(int i = 0; i< towels.Count;i++)
-            {
-                towels[i] = towels[i].Trim();
-            }
-            texts = [];
-            for (int i = 2; i < _input.Length; i++)
-            {
-                texts.Add(_input[i]);
-            }
-            index = [];
-            towels.Sort();
-            char c = towels[0][0];
-            int from = 0;
-            for (int i = 0; i < towels.Count; i++)
-            {
-                if(towels[i][0] != c)
-                {
-                    index.Add(c, (from, i-1));
-                    c = towels[i][0];
-                    from = i;
-                }
-            }
-            index.Add(c, (from, towels.Count - 1));
+            towels = [.. _input[0].Split(", ")];
+            texts = _input[2.._input.Length];
+            cache = [];
         }
-        public override ValueTask<string> Solve_1()
+        public override ValueTask<string> Solve_1() => new($"{texts.AsParallel().Count(text => GetToEnd(text) > 0)}");
+        public override ValueTask<string> Solve_2() => new($"{texts.AsParallel().Sum(text => GetToEnd(text))}");
+        long GetToEnd(string remain)
         {
-            long ans = 0;
-            towels.Sort();
-            foreach (string text in texts)
-            {
-                if (getToEnd(text)>0)
-                {
-                    ans++;
-                }
-            }
-            return new($"{ans}");
-        }
-        public override ValueTask<string> Solve_2()
-        {
-            long ans = 0;
-            foreach (string text in texts)
-            {
-                ans += getToEnd(text);
-            }
-
-            return new($"{ans}");
-        }
-
-        Dictionary<char, (int from, int to)> index;
-        Dictionary<string, long> cache = new();
-        long getToEnd(string remain)
-        {
-            if (cache.ContainsKey(remain)) return cache[remain];
+            if (cache.TryGetValue(remain, out long val))
+                return val;
             if (remain.Length == 0) return 1;
             long tot = 0;
-            for (int i = index[remain[0]].from;i<= index[remain[0]].to; i++)
+            foreach(var towel in towels)
             {
-                if (remain[0] == towels[i][0])
+                if (remain[0] == towel[0]&&towel.Length<=remain.Length)
                 {
-                    if (remain.StartsWith(towels[i]))
+                    if (remain[..towel.Length]==towel)
                     {
-                        long curr = getToEnd(remain.Substring(towels[i].Length));
+                        long curr = GetToEnd(remain[towel.Length..]);
                         tot += curr;
                     }
                 }
-
             }
-            cache.Add(remain, tot);
+            cache[remain] = tot;
             return tot;
         }
 

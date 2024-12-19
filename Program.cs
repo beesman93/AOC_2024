@@ -11,7 +11,6 @@ using AoCHelper;
 /* TODO:
  * 
  * high prio optims                         (solves >1s)
- * *   optimize Day19                       (1.1s)
  * 
  * medium prio optims                       (solves 200ms - 1s)
  *  *  optimize Day09 part 2                (223ms)
