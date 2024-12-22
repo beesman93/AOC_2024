@@ -26,12 +26,14 @@ namespace AOC_2024
         }
 
         //we prune by 16777216 so int is fine
-        public int GenerateNext(int secret)
+        //no need to prune when xoring with value shifted right
+        //only prune values shifted left, incoming secret is
+        //already pruned on every step
+        public void GenerateNext(ref int secret)
         {
-            int next = (secret ^ (secret << 6)) & 16777215;
-            next = (next ^ (next >> 5)) & 16777215;
-            next = (next ^ (next << 11)) & 16777215;
-            return next;
+            secret ^= (secret << 6) & 16777215;
+            secret ^= secret >> 5;
+            secret ^= (secret << 11) & 16777215;
         }
         public override ValueTask<string> Solve_1()
         {
@@ -40,8 +42,8 @@ namespace AOC_2024
             {
                 for (int k = 0; k < TURNS; k++)
                 {
-                    monkeyPrices[i, k] = (int)(monkeyTokens[i] % 10);
-                    monkeyTokens[i] = GenerateNext(monkeyTokens[i]);
+                    monkeyPrices[i, k] = monkeyTokens[i] % 10;
+                    GenerateNext(ref monkeyTokens[i]);
                 }
                 ans += monkeyTokens[i];
             }
