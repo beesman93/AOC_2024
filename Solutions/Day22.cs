@@ -47,19 +47,22 @@ namespace AOC_2024
             }
             return new($"{ans}");
         }
-        public void CalculateBananas(ref Dictionary<(int,int,int,int),int> sales)
+        public void CalculateBananas(ref Dictionary<int,int> bananas)
         {
             for (int i = 0; i < monkeyPrices.GetLength(0); i++)
             {
-                HashSet<(int, int, int, int)> visited = [];
+                HashSet<int> visited = [];
                 for (int k = 0; k < TURNS - 4; k++)
                 {
-                    var key = ( monkeyPrices[i, k + 1] - monkeyPrices[i, k],
-                                monkeyPrices[i, k + 2] - monkeyPrices[i, k + 1],
-                                monkeyPrices[i, k + 3] - monkeyPrices[i, k + 2],
-                                monkeyPrices[i, k + 4] - monkeyPrices[i, k + 3]);
-                    if (!visited.Contains(key)&&sales.ContainsKey(key))
-                        sales[key] += monkeyPrices[i, k + 4];
+                    var key =   (monkeyPrices[i, k + 1] - monkeyPrices[i, k]) *1000000+
+                                (monkeyPrices[i, k + 2] - monkeyPrices[i, k + 1])*10000+
+                                (monkeyPrices[i, k + 3] - monkeyPrices[i, k + 2])*100+
+                                (monkeyPrices[i, k + 4] - monkeyPrices[i, k + 3]);
+                    if (!visited.Contains(key))
+                        if(bananas.ContainsKey(key))
+                            bananas[key] += monkeyPrices[i, k + 4];
+                        else
+                            bananas[key] = monkeyPrices[i, k + 4];
                     visited.Add(key);
                 }
             }
@@ -67,21 +70,9 @@ namespace AOC_2024
         public override ValueTask<string> Solve_2()
         {
             int ans = int.MinValue;
-            Dictionary<(int, int, int, int), int> tests = [];
-            for (int i = 0; i < monkeyTokens.Length; i++)
-            {
-                for (int k = 0; k < TURNS-4; k++)
-                {
-                    tests.TryAdd((
-                        monkeyPrices[i, k + 1] - monkeyPrices[i, k],
-                        monkeyPrices[i, k + 2] - monkeyPrices[i, k + 1],
-                        monkeyPrices[i, k + 3] - monkeyPrices[i, k + 2],
-                        monkeyPrices[i, k + 4] - monkeyPrices[i, k + 3])
-                        ,0);
-                }
-            }
-            CalculateBananas(ref tests);
-            foreach (var test in tests.Values)
+            Dictionary<int, int> bananas = [];
+            CalculateBananas(ref bananas);
+            foreach (var test in bananas.Values)
             {
                 if (test > ans)
                 {
