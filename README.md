@@ -1,4 +1,5 @@
 # AOC_2024
+https://adventofcode.com/2024
 
 |Mon|Tue|Wed|Thu|Fri|Sat|Sun|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
