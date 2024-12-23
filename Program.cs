@@ -22,7 +22,7 @@ using AoCHelper;
  * 
  */
 
-await Solver.Solve([typeof(Day22)], options =>
+await Solver.Solve([typeof(Day23)], options =>
 {
     options.ShowConstructorElapsedTime = true;
     options.ShowOverallResults = true;
