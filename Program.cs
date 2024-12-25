@@ -1,12 +1,12 @@
 ﻿using AOC_2024;
 using AoCHelper;
 
-/*await Solver.SolveAll(options =>
+await Solver.SolveAll(options =>
 {
     options.ShowConstructorElapsedTime = true;
     options.ShowOverallResults = true;
     options.ClearConsole = false;
-});*/
+});
 
 /* TODO:
  * 
@@ -18,13 +18,12 @@ using AoCHelper;
  * │ Day 6  │ Part 2  │ 169 ms
  * │ Day 14 │ Part 2  │ 161 ms 
  * │ Day 17 │ Part 2  │ 126 ms 
- * │ Day 13 │ Part 1  │ 112 ms
  * 
  */
 
-await Solver.Solve([typeof(Day23)], options =>
+/*await Solver.Solve([typeof(Day25)], options =>
 {
     options.ShowConstructorElapsedTime = true;
     options.ShowOverallResults = true;
     options.ClearConsole = true;
-});
+});*/
